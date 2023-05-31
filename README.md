@@ -54,5 +54,5 @@ $ pip install pyinstaller
 Agora basta usar a lib para criar o executável:
 
 ```
-$ pyinstaller sentinext.spec
+$ pyinstaller --name=sentinext --onefile src/main.py
 ```
