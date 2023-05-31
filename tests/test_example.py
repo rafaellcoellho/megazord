@@ -1,4 +1,4 @@
-from chat.main import example
+from src.main import example
 
 
 def test_example():
