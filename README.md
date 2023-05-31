@@ -1,7 +1,9 @@
-# Trabalho final de PPD
+# Sentinext
 
 Esse programa foi feito para a disciplina de Programação Paralela e Distribuida do curso de engenharia da computação no
-IFCE do semestre 2023.1.
+IFCE do semestre 2023.1. O objetivo deste projeto consiste na construção de uma aplicação de chat entre
+usuários, dotada de um sistema de monitoramento baseado em palavras-chave utilizando as tecnologias estudadas ao longo
+do semestre, tais como MOM (Message-Oriented Middleware), RPC (Remote Procedure Call) e espaço de tuplas.
 
 ## Desenvolvimento
 
@@ -52,5 +54,5 @@ $ pip install pyinstaller
 Agora basta usar a lib para criar o executável:
 
 ```
-$ pyinstaller app.spec
+$ pyinstaller sentinext.spec
 ```
