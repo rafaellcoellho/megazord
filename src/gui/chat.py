@@ -1,5 +1,10 @@
 import tkinter
+import uuid
 from tkinter import ttk
+from typing import Dict, List
+
+from src.domain.user import User
+from src.repository.user import UserRepository, UserAbstractRepository
 
 
 class UserMessagesWindow(tkinter.Toplevel):
@@ -46,8 +51,10 @@ class UserMessagesWindow(tkinter.Toplevel):
 
 
 class ChatGUI:
-    def __init__(self):
-        self.gui_engine = tkinter.Tk = tkinter.Tk()
+    def __init__(self, services: Dict):
+        self.services: Dict = services
+
+        self.gui_engine: tkinter.Tk = tkinter.Tk()
 
         self.gui_engine.title("Sentinext Chat")
         self.gui_engine.resizable(False, False)
@@ -87,10 +94,28 @@ class ChatGUI:
         self.button_remove_user.grid(row=2, column=1, sticky=tkinter.EW)
 
     def _add_user(self):
-        pass
+        input_value: str = self.input_name_user.get()
+
+        new_user: User = User(name=input_value)
+        user_repository: UserAbstractRepository = UserRepository(
+            tuple_space=self.services["tuple_space"]
+        )
+        user_repository.add(user=new_user)
+
+        self.user_list.insert(tkinter.END, new_user.name)
+        self.input_name_user.delete(0, tkinter.END)
 
     def _remove_user(self):
-        pass
+        selected_index: int = self.user_list.curselection()
+        user_name: str = self.user_list.get(selected_index)
+
+        user_repository: UserAbstractRepository = UserRepository(
+            tuple_space=self.services["tuple_space"]
+        )
+        user: User = user_repository.get_by_name(name=user_name)
+        user_repository.remove(user_id=user.id)
+
+        self.user_list.delete(selected_index)
 
     def _open_window_messages_user(self):
         UserMessagesWindow()
