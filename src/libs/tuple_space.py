@@ -17,6 +17,10 @@ class AbstractTupleSpace(abc.ABC):
     def take(self, pattern: Tuple) -> Optional[Tuple]:
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def read_all(self, pattern: Tuple) -> List[Tuple]:
+        raise NotImplementedError
+
 
 class TupleSpace(AbstractTupleSpace):
     def __init__(self):
