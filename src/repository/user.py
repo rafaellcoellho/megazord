@@ -1,6 +1,6 @@
 import abc
 import uuid
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 from src.domain.user import User
 from src.libs.tuple_space import AbstractTupleSpace
@@ -26,6 +26,10 @@ class UserAbstractRepository(abc.ABC):
     def remove(self, user_id: uuid.UUID):
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def get_all(self) -> List[User]:
+        raise NotImplementedError
+
 
 class UserRepository(UserAbstractRepository):
     def add(self, user: User):
@@ -41,3 +45,9 @@ class UserRepository(UserAbstractRepository):
 
     def remove(self, user_id: uuid.UUID):
         self._tuple_space.take(("user", user_id, str))
+
+    def get_all(self) -> List[User]:
+        return [
+            User(user_id=user_tuple[1], name=user_tuple[2])
+            for user_tuple in self._tuple_space.read_all(("user", uuid.UUID, str))
+        ]
