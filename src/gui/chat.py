@@ -1,5 +1,4 @@
 import tkinter
-import uuid
 from tkinter import ttk
 from typing import Dict, List
 
@@ -8,9 +7,13 @@ from src.repository.user import UserRepository, UserAbstractRepository
 
 
 class UserMessagesWindow(tkinter.Toplevel):
-    def __init__(self):
+    def __init__(self, services: Dict, user: User):
         super().__init__()
-        self.title("Usuário")
+
+        self.services: Dict = services
+        self.user: User = user
+
+        self.title(self.user.name)
         self.resizable(False, False)
 
         self.main_frame: tkinter.LabelFrame = tkinter.LabelFrame(self, text="Mensagens")
@@ -21,11 +24,9 @@ class UserMessagesWindow(tkinter.Toplevel):
         )
         self.user_selector: ttk.Combobox = ttk.Combobox(
             self.main_frame,
-            values=["Usuario 1", "Usuario 2"],
             state="readonly",
             font=("Arial", 15),
         )
-        self.user_selector.current(0)
         self.input_message: tkinter.Entry = tkinter.Entry(
             self.main_frame,
             font=("Arial", 15),
@@ -46,8 +47,21 @@ class UserMessagesWindow(tkinter.Toplevel):
         self.input_message.grid(row=1, column=1, sticky=tkinter.EW)
         self.button_send_message.grid(row=1, column=2, sticky=tkinter.EW)
 
+        self._update_available_users_to_send_message()
+
     def _send_message(self):
         pass
+
+    def _update_available_users_to_send_message(self):
+        user_repository: UserAbstractRepository = UserRepository(
+            tuple_space=self.services["tuple_space"]
+        )
+        users: List[User] = user_repository.get_all()
+
+        self.user_selector["values"] = [
+            user.name for user in users if user.id != self.user.id
+        ]
+        self.user_selector.current(0)
 
 
 class ChatGUI:
@@ -118,7 +132,15 @@ class ChatGUI:
         self.user_list.delete(selected_index)
 
     def _open_window_messages_user(self):
-        UserMessagesWindow()
+        selected_index: int = self.user_list.curselection()
+        user_name: str = self.user_list.get(selected_index)
+
+        user_repository: UserAbstractRepository = UserRepository(
+            tuple_space=self.services["tuple_space"]
+        )
+        user: User = user_repository.get_by_name(name=user_name)
+
+        UserMessagesWindow(services=self.services, user=user)
 
     def run(self):
         self.gui_engine.mainloop()
