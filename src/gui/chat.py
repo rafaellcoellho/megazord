@@ -18,6 +18,11 @@ class UserMessagesWindow(tkinter.Toplevel):
 
         self.main_frame: tkinter.LabelFrame = tkinter.LabelFrame(self, text="Mensagens")
 
+        self.button_update_state: tkinter.Button = tkinter.Button(
+            self.main_frame,
+            text="Atualizar",
+            command=self._update_state,
+        )
         self.message_box: tkinter.Text = tkinter.Text(
             self.main_frame,
             state=tkinter.DISABLED,
@@ -42,12 +47,13 @@ class UserMessagesWindow(tkinter.Toplevel):
         self.main_frame.grid_columnconfigure(1, weight=3)
         self.main_frame.grid_columnconfigure(2, weight=1)
 
-        self.message_box.grid(row=0, column=0, columnspan=3, sticky=tkinter.EW)
-        self.user_selector.grid(row=1, column=0, sticky=tkinter.EW)
-        self.input_message.grid(row=1, column=1, sticky=tkinter.EW)
-        self.button_send_message.grid(row=1, column=2, sticky=tkinter.EW)
+        self.button_update_state.grid(row=0, column=0, columnspan=3, sticky=tkinter.EW)
+        self.message_box.grid(row=1, column=0, columnspan=3, sticky=tkinter.EW)
+        self.user_selector.grid(row=2, column=0, sticky=tkinter.EW)
+        self.input_message.grid(row=2, column=1, sticky=tkinter.EW)
+        self.button_send_message.grid(row=2, column=2, sticky=tkinter.EW)
 
-        self._update_available_users_to_send_message()
+        self._update_state()
 
     def _send_message(self):
         pass
@@ -62,6 +68,9 @@ class UserMessagesWindow(tkinter.Toplevel):
             user.name for user in users if user.id != self.user.id
         ]
         self.user_selector.current(0)
+
+    def _update_state(self):
+        self._update_available_users_to_send_message()
 
 
 class ChatGUI:
