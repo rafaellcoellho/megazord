@@ -2,8 +2,8 @@ import tkinter
 from tkinter import ttk
 from typing import Dict, List
 
+from src.domain.message import Message
 from src.domain.user import User
-from src.repository.user import UserRepository, UserAbstractRepository
 
 
 class UserMessagesWindow(tkinter.Toplevel):
@@ -56,21 +56,60 @@ class UserMessagesWindow(tkinter.Toplevel):
         self._update_state()
 
     def _send_message(self):
-        pass
+        name_user_destination: str = self.user_selector.get()
+        message_content: str = self.input_message.get()
+
+        user_destination: User = self.services["user_repository"].get_by_name(
+            name=name_user_destination
+        )
+
+        self.services["message_repository"].add(
+            message=Message(
+                origin=self.user.id,
+                destination=user_destination.id,
+                content=message_content,
+            )
+        )
+        self.input_message.delete(0, tkinter.END)
+
+        self.message_box.configure(state=tkinter.NORMAL)
+        self.message_box.insert(
+            tkinter.END, f"Você para {user_destination.name}: {message_content}\n"
+        )
+        self.message_box.configure(state=tkinter.DISABLED)
 
     def _update_available_users_to_send_message(self):
-        user_repository: UserAbstractRepository = UserRepository(
-            tuple_space=self.services["tuple_space"]
-        )
-        users: List[User] = user_repository.get_all()
+        self.friends = {
+            user.name: user
+            for user in self.services["user_repository"].get_all()
+            if user.id != self.user.id
+        }
 
-        self.user_selector["values"] = [
-            user.name for user in users if user.id != self.user.id
-        ]
-        self.user_selector.current(0)
+        self.user_selector["values"] = [user.name for user in self.friends.values()]
+
+        if self.friends:
+            self.user_selector.current(0)
+
+    def _update_messages(self):
+        messages: List[Message] = self.services[
+            "message_repository"
+        ].consume_all_messages_for_user(user_id=self.user.id)
+
+        self.message_box.configure(state=tkinter.NORMAL)
+
+        for message in messages:
+            user_origin: User = self.services["user_repository"].get_by_id(
+                user_id=message.origin
+            )
+            self.message_box.insert(
+                tkinter.END, f"{user_origin.name}: {message.content}\n"
+            )
+
+        self.message_box.configure(state=tkinter.DISABLED)
 
     def _update_state(self):
         self._update_available_users_to_send_message()
+        self._update_messages()
 
 
 class ChatGUI:
@@ -120,10 +159,7 @@ class ChatGUI:
         input_value: str = self.input_name_user.get()
 
         new_user: User = User(name=input_value)
-        user_repository: UserAbstractRepository = UserRepository(
-            tuple_space=self.services["tuple_space"]
-        )
-        user_repository.add(user=new_user)
+        self.services["user_repository"].add(user=new_user)
 
         self.user_list.insert(tkinter.END, new_user.name)
         self.input_name_user.delete(0, tkinter.END)
@@ -132,11 +168,8 @@ class ChatGUI:
         selected_index: int = self.user_list.curselection()
         user_name: str = self.user_list.get(selected_index)
 
-        user_repository: UserAbstractRepository = UserRepository(
-            tuple_space=self.services["tuple_space"]
-        )
-        user: User = user_repository.get_by_name(name=user_name)
-        user_repository.remove(user_id=user.id)
+        user: User = self.services["user_repository"].get_by_name(name=user_name)
+        self.services["user_repository"].remove(user_id=user.id)
 
         self.user_list.delete(selected_index)
 
@@ -144,10 +177,7 @@ class ChatGUI:
         selected_index: int = self.user_list.curselection()
         user_name: str = self.user_list.get(selected_index)
 
-        user_repository: UserAbstractRepository = UserRepository(
-            tuple_space=self.services["tuple_space"]
-        )
-        user: User = user_repository.get_by_name(name=user_name)
+        user: User = self.services["user_repository"].get_by_name(name=user_name)
 
         UserMessagesWindow(services=self.services, user=user)
 
