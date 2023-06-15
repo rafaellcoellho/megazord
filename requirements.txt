@@ -1,6 +1,11 @@
+altgraph==0.17.3
 exceptiongroup==1.1.1
 iniconfig==2.0.0
+linsimpy @ git+https://github.com/rafaellcoellho/linsimpy.git@dc9f9184eb40aa2f794baac9c7f14924b88e6456
 packaging==23.1
 pluggy==1.0.0
+pyinstaller==5.11.0
+pyinstaller-hooks-contrib==2023.3
 pytest==7.3.1
+simpy==4.0.1
 tomli==2.0.1
