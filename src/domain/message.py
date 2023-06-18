@@ -1,8 +1,6 @@
 import uuid
 from typing import Optional
 
-from src.domain.user import User
-
 
 class Message:
     def __init__(

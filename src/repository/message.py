@@ -1,6 +1,6 @@
 import abc
 import uuid
-from typing import List, Tuple, Iterator, Optional
+from typing import Tuple, Iterator, Optional
 
 from src.domain.message import Message
 from src.libs.tuple_space import AbstractTupleSpace
@@ -33,8 +33,10 @@ class MessageRepository(MessageAbstractRepository):
 
     def consume_all_messages_for_user(self, user_id: uuid.UUID) -> Iterator[Message]:
         pattern: Tuple = ("message", uuid.UUID, uuid.UUID, user_id, str)
+
         while self._tuple_space.read(pattern):
             message_tuple: Optional[Tuple] = self._tuple_space.take(pattern)
+
             if message_tuple:
                 yield Message(
                     message_id=message_tuple[1],
