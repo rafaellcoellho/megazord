@@ -6,6 +6,8 @@ packaging==23.1
 pluggy==1.0.0
 pyinstaller==5.11.0
 pyinstaller-hooks-contrib==2023.3
+Pyro5==5.14
 pytest==7.3.1
+serpent==1.41
 simpy==4.0.1
 tomli==2.0.1
