@@ -22,7 +22,7 @@ class RpcServer(AbstractRpcServer):
         self.name_server: Pyro5.api.Proxy = Pyro5.api.locate_ns()
 
     def register_object(self, object_name: str, rpc_object: AbstractRpcObject):
-        uri: Pyro5.api.URI = self.pyro_daemon.register(object)
+        uri: Pyro5.api.URI = self.pyro_daemon.register(rpc_object)
         self.name_server.register(f"sentinext.{object_name}", uri)
 
     def start(self):
