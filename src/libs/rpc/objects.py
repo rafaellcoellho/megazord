@@ -2,7 +2,7 @@ import abc
 
 import Pyro5.api
 
-from src.libs.message_broker import AbstractMessageBroker
+from src.libs.message_broker import AbstractMessageBroker, Topic
 
 
 class AbstractRpcObject(abc.ABC):
@@ -29,7 +29,7 @@ class Censor(AbstractCensor):
         self, message: str, user_origin_name: str, user_destination_name: str
     ):
         self.message_broker.send_message_to_topic(
-            topic_name="tracked_messages",
+            topic_name=Topic.TRACKED_MESSAGES.value,
             message=f"{user_origin_name} send to {user_destination_name} -> {message}",
         )
 

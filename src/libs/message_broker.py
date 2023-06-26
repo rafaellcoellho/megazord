@@ -1,7 +1,12 @@
 import abc
+import enum
 from typing import Dict, Callable, Any
 
 import stomp
+
+
+class Topic(enum.Enum):
+    TRACKED_MESSAGES = "tracked_messages"
 
 
 class AbstractMessageBroker(abc.ABC):
