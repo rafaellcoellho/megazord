@@ -3,6 +3,7 @@ from tkinter import ttk
 from typing import Dict, List
 
 from src.domain.message import Message
+from src.domain.spy import Spy
 from src.domain.user import User
 
 
@@ -112,9 +113,80 @@ class UserMessagesWindow(tkinter.Toplevel):
         self._update_messages()
 
 
+class ManageSpyWindow(tkinter.Toplevel):
+    def __init__(self, services: Dict):
+        super().__init__()
+
+        self.services: Dict = services
+
+        self.title("Gerenciar Espião")
+        self.resizable(False, False)
+
+        self.main_frame: tkinter.LabelFrame = tkinter.LabelFrame(
+            self, text="Palavras suspeitas"
+        )
+
+        self.input_tracked_word: tkinter.Entry = tkinter.Entry(
+            self.main_frame,
+            font=("Arial", 15),
+        )
+        self.button_add_tracked_word: tkinter.Button = tkinter.Button(
+            self.main_frame,
+            text="Adicionar",
+            command=self._add_tracked_word,
+        )
+        self.tracked_word_list: tkinter.Listbox = tkinter.Listbox(
+            self.main_frame,
+        )
+        self.button_remove_tracked_word: tkinter.Button = tkinter.Button(
+            self.main_frame,
+            text="Remover",
+            command=self._remove_tracked_word,
+        )
+
+        self.main_frame.grid(row=0, column=0, padx=10, pady=10)
+        self.input_tracked_word.grid(row=0, column=0)
+        self.button_add_tracked_word.grid(row=0, column=1)
+        self.tracked_word_list.grid(row=1, column=0, columnspan=2, sticky=tkinter.EW)
+        self.button_remove_tracked_word.grid(
+            row=2, column=0, columnspan=2, sticky=tkinter.EW
+        )
+
+        self._update_tracked_word_list()
+
+    def _add_tracked_word(self):
+        new_tracked_word: str = self.input_tracked_word.get()
+
+        spy: Spy = self.services["spy_repository"].get()
+        spy.add_tracked_word(new_tracked_word)
+        self.services["spy_repository"].update(spy)
+
+        self.input_tracked_word.delete(0, tkinter.END)
+        self._update_tracked_word_list()
+
+    def _remove_tracked_word(self):
+        selected_index: int = self.tracked_word_list.curselection()
+        tracked_word_to_remove: str = self.tracked_word_list.get(selected_index)
+
+        spy: Spy = self.services["spy_repository"].get()
+        spy.remove_tracked_word(tracked_word_to_remove)
+        self.services["spy_repository"].update(spy)
+
+        self._update_tracked_word_list()
+
+    def _update_tracked_word_list(self):
+        spy: Spy = self.services["spy_repository"].get()
+
+        self.tracked_word_list.delete(0, tkinter.END)
+        for tracked_word in spy.tracked_words:
+            self.tracked_word_list.insert(tkinter.END, tracked_word)
+
+
 class ChatGUI:
     def __init__(self, services: Dict):
         self.services: Dict = services
+
+        self.services["spy_repository"].add(Spy())
 
         self.gui_engine: tkinter.Tk = tkinter.Tk()
 
@@ -147,6 +219,11 @@ class ChatGUI:
             text="Remover",
             command=self._remove_user,
         )
+        self.button_manage_spy: tkinter.Button = tkinter.Button(
+            self.main_frame,
+            text="Gerenciar Espião",
+            command=self._open_window_manage_spy,
+        )
 
         self.main_frame.grid(row=0, column=0, padx=10, pady=10)
         self.input_name_user.grid(row=0, column=0)
@@ -154,6 +231,7 @@ class ChatGUI:
         self.user_list.grid(row=1, column=0, columnspan=2, sticky=tkinter.EW)
         self.button_go_to_messages.grid(row=2, column=0, sticky=tkinter.EW)
         self.button_remove_user.grid(row=2, column=1, sticky=tkinter.EW)
+        self.button_manage_spy.grid(row=3, column=0, columnspan=2, sticky=tkinter.EW)
 
     def _add_user(self):
         input_value: str = self.input_name_user.get()
@@ -180,6 +258,9 @@ class ChatGUI:
         user: User = self.services["user_repository"].get_by_name(name=user_name)
 
         UserMessagesWindow(services=self.services, user=user)
+
+    def _open_window_manage_spy(self):
+        ManageSpyWindow(services=self.services)
 
     def run(self):
         self.gui_engine.mainloop()
