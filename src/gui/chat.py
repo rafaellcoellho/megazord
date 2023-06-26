@@ -64,6 +64,14 @@ class UserMessagesWindow(tkinter.Toplevel):
             name=name_user_destination
         )
 
+        spy: Spy = self.services["spy_repository"].get()
+        if spy.message_contains_any_tracked_word(message_content):
+            self.services["censor"].submit_for_review(
+                message=message_content,
+                user_origin_name=self.user.name,
+                user_destination_name=user_destination.name,
+            )
+
         self.services["message_repository"].add(
             message=Message(
                 origin=self.user.id,
